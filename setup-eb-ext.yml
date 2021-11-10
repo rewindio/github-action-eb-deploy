@@ -2,13 +2,6 @@ name: Set-up ElasticBeanstalk Extensions
 
 on:
   workflow_call:
-    inputs:
-      region:
-        required: true
-        type: string
-    secrets:
-      token:
-        required: true
 
 jobs:
   environment-setup:
