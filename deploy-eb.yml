@@ -1,0 +1,114 @@
+name: Deploy Elastic Beanstalk
+
+on:
+  workflow_call:
+    inputs:
+      deployment_environment_name:
+        description: "The deployment environment, either staging or production, for printing purposes only."
+        required: true
+        type: string
+      application_name:
+        description: "The name of the Elastic Beanstalk application to deploy to"
+        required: true
+        type: string
+      aws_region:
+        description: "The region to deploy to"
+        default: "us-east-1"
+        required: false
+        type: string
+      environment_name_list:
+        description: "A JSON list of Elastic Beanstalk environment name. Must have escaped quotes on each list element."
+        required: true
+        type: string
+      version_label:
+        description: "The Elastic Beanstalk version label"
+        required: true
+        type: string
+    secrets:
+      EB_AWS_ACCESS_KEY_ID:
+        required: true
+      EB_AWS_SECRET_ACCESS_KEY_ID:
+        required: true
+
+
+jobs:
+  deploy-elasticbeanstalk:
+    name: "Deploy Elastic Beanstalk"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment_name: ${{fromJson(inputs.environment_name_list)}}
+    steps:
+      - name: Download deployment artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: eb-app-zip
+      - name: Upload application zip to S3 and create EB application version
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: ${{ secrets.EB_AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.EB_AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ inputs.application_name }}
+          environment_name: ${{ matrix.environment_name }}
+          version_label: ${{ inputs.version_label }} 
+          version_description: Commit ${{github.sha}} deployed by github actions
+          region: ${{ inputs.aws_region }}
+          deployment_package: deploy.zip
+          use_existing_version_if_available: true
+          wait_for_deployment: true
+          wait_for_environment_recovery: 60
+
+      - name: Set commit title
+        # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+        continue-on-error: true
+        run: |
+          COMMIT_TITLE="$(echo '''${{ github.event.head_commit.message }}''' | head)"
+          echo "COMMIT_TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
+
+      - name: Notify Slack on Success
+        uses: ravsamhq/notify-slack-action@v1
+        if: always()
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ inputs.deployment_environment_name }} has {status_message}'
+          message_format: >
+            ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
+          footer: '<{repo_url}|{repo}>'
+          notify_when: 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack on Failure
+        uses: ravsamhq/notify-slack-action@v1
+        if: always()
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ inputs.deployment_environment_name }} as {status_message}'
+          message_format: >
+            ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
+          footer: '<{repo_url}|{repo}>'
+          notify_when: 'failure'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
+
+      - name: Find Slack user
+        if: failure()
+        id: find-slack-user
+        uses: scribd/find-slack-user-action@v1
+        with:
+          include-at-symbol: true
+          slack-token: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
+
+      - name: Send a Slack DM to the user linking the failure
+        if: failure()
+        uses: archive/github-actions-slack@v2.2.1
+        with:
+          slack-function: send-message
+          slack-bot-user-oauth-access-token: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
+          slack-channel: "${{ steps.find-slack-user.outputs.username }}"
+          slack-text: |
+            <@${{ steps.find-slack-user.outputs.member-id }}>: <${{ env.RUN_URL }}|${{ env.COMMIT_TITLE }}> has failed.
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

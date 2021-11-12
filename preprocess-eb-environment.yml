@@ -1,0 +1,88 @@
+name: Set-up ElasticBeanstalk Extensions
+
+on:
+  workflow_call:
+
+jobs:
+  environment-setup:
+    name: Preprocess EB Extensions
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: rewindio/docker-amazonlinux2-ruby:2.6.8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure bundler
+        run: |
+          mkdir -p vendor/bundle
+          bundle config path vendor/bundle
+
+      - name: bundle cache
+        uses: actions/cache@v2
+        id: bundle-cache
+        with:
+          path: |
+            vendor/cache
+            vendor/bundle
+          key: ${{ runner.os }}-bundle-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundle-
+
+      # Extensions caches need to be per commit because the extensions can change
+      # without the underlying requirements.yml file changing
+      # We are really only using the cache to pass to the next job
+      - name: extensions cache
+        uses: actions/cache@v2
+        id: extensions-cache
+        with:
+          path: .ebextensions
+          key: ${{ runner.os }}-extensions-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-extensions-${{ github.sha }}
+
+      - name: hooks cache
+        uses: actions/cache@v2
+        id: hooks-cache
+        with:
+          path: .platform
+          key: ${{ runner.os }}-extensions-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-platform-${{ github.sha }}
+
+      - name: bundle install
+        if: steps.bundle-cache.outputs.cache-hit != 'true'
+        env:
+          BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
+          BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
+        run: |
+          bundle install --jobs 4 --retry 3
+          bundle clean --force
+
+      # Pre-process the Beanstalk extensions and hooks
+      # We always want to do this in case an extension changes in the extensions/hooks repos
+      - name: Checkout EB extensions
+        uses: actions/checkout@v2
+        with:
+          repository: rewindio/eb-extensions
+          token: ${{ secrets.CONTAINER_REGISTRY_PAT }}
+          path: tmp/eb-extensions
+
+      - name: Checkout EB hooks
+        uses: actions/checkout@v2
+        with:
+          repository: rewindio/eb-platform-hooks
+          token: ${{ secrets.CONTAINER_REGISTRY_PAT }}
+          path: tmp/eb-platform-hooks
+
+      - name: Preprocess EB extensions
+        run:
+          ./tmp/eb-extensions/copy_extensions.rb --extensions_dir ./tmp/eb-extensions/extensions
+
+      - name: Preprocess EB hooks
+        run:
+          ./tmp/eb-platform-hooks/copy_hooks.rb --hooks_dir ./tmp/eb-platform-hooks/hooks
+
