@@ -55,7 +55,7 @@ jobs:
       application_name: "My App Name"
       aws_region: "us-east-2"
       # This must parse later as JSON, so we need to add escaped quotes on each element
-      environment_name_matrix: '[ \"my-env-1\", \"my-env-2\" ]' 
+      environment_name_matrix: "[ \"my-env-1\", \"my-env-2\" ]"
       # Please note that only `github` and `needs` variables are accessible here 
       # c.f.: https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
       version_label: "my-app-${{ github.sha }}"
