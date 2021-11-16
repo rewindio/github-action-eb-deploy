@@ -28,7 +28,7 @@ This is a GitHub reusable workflow that will deploy the application for you, giv
 | environment_name_list | A JSON list of Elastic Beanstalk environment name. Must have escaped quotes on each list element. | No | Yes |
 | version_label | The Elastic Beanstalk version label | No | Yes |
 | EB_AWS_ACCESS_KEY_ID | The AWS Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
-| EB_AWS_SECRET_ACCESS_KEY_ID | The AWS Secret Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
+| EB_AWS_SECRET_ACCESS_KEY | The AWS Secret Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
 
 ## `workflow.yml` Example
 
@@ -67,7 +67,7 @@ jobs:
       # c.f.: https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
     secrets:
       EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
-      EB_AWS_SECRET_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY_ID }}
+      EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
       # Secrets are not accessible unless they are shared, so we need these three even though they are redundant
       DEPLOY_FAILURES_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
       DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}

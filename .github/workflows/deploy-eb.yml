@@ -27,7 +27,7 @@ on:
     secrets:
       EB_AWS_ACCESS_KEY_ID:
         required: true
-      EB_AWS_SECRET_ACCESS_KEY_ID:
+      EB_AWS_SECRET_ACCESS_KEY:
         required: true
       DEPLOY_FAILURES_SLACK_WEBHOOK_URL:
         required: true
