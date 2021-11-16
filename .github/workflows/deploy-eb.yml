@@ -29,6 +29,12 @@ on:
         required: true
       EB_AWS_SECRET_ACCESS_KEY_ID:
         required: true
+      DEPLOY_FAILURES_SLACK_WEBHOOK_URL:
+        required: true
+      DEPLOY_SUCCESS_SLACK_WEBHOOK_URL:
+        required: true
+      LOOKUP_USER_EMAIL_SLACK_TOKEN:
+        required: true
 
 
 jobs:

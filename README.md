@@ -47,7 +47,7 @@ jobs:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
       CONTAINER_REGISTRY_PAT: ${{ secrets.CONTAINER_REGISTRY_PAT }}
-  
+
   create-deployment-zip:
     name: "Create Deployment Zip"
     uses: rewindio/github-action-eb-deploy/create-zip.yml
@@ -63,7 +63,12 @@ jobs:
       aws_region: "us-east-2"
       # This must parse later as JSON, so we need to add escaped quotes on each element
       environment_name_matrix: "[ \"my-env-1\", \"my-env-2\" ]"
-      # Please note that only `github` and `needs` variables are accessible here 
+      # Please note that only `github` and `needs` variables are accessible here
       # c.f.: https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
-      version_label: "my-app-${{ github.sha }}"
-```
+    secrets:
+      EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
+      EB_AWS_SECRET_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY_ID }}
+      # Secrets are not accessible unless they are shared, so we need these three even though they are redundant
+      DEPLOY_FAILURES_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
+      DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
+      LOOKUP_USER_EMAIL_SLACK_TOKEN: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
