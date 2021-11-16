@@ -42,6 +42,11 @@ jobs:
   preprocess-eb-environment:
     name: "Preprocess EB environment"
     uses: rewindio/github-action-eb-deploy/preprocess-eb-environment.yml
+    secrets:
+      # Please ensure the right-hand side is appropriately named for your repo &/ env
+      BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
+      BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
+      CONTAINER_REGISTRY_PAT: ${{ secrets.CONTAINER_REGISTRY_PAT }}
   
   create-deployment-zip:
     name: "Create Deployment Zip"

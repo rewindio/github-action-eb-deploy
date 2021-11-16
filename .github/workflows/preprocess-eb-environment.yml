@@ -2,6 +2,13 @@ name: Set-up ElasticBeanstalk Extensions
 
 on:
   workflow_call:
+    secrets:
+      BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
+        required: true
+      BUNDLE_GEMS__CONTRIBSYS__COM:
+        required: true
+      CONTAINER_REGISTRY_PAT:
+        required: true
 
 jobs:
   environment-setup:
@@ -57,7 +64,7 @@ jobs:
         if: steps.bundle-cache.outputs.cache-hit != 'true'
         env:
           BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
-          BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
+          BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
         run: |
           bundle install --jobs 4 --retry 3
           bundle clean --force
