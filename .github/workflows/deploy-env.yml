@@ -87,7 +87,7 @@ jobs:
         with:
           status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.environment_name }} as {status_message}'
+          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.environment_name }} has {status_message}'
           message_format: >
             ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
           footer: '<{repo_url}|{repo}>'
