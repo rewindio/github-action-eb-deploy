@@ -61,6 +61,9 @@ jobs:
     with:
       application_name: "My App Name"
       version_label: "my-version-label"
+    secrets:
+      EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
+      EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
 
   deploy-staging:
     name: "Deploy Staging environments"
