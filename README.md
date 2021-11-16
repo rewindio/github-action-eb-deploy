@@ -46,10 +46,12 @@ jobs:
   create-deployment-zip:
     name: "Create Deployment Zip"
     uses: rewindio/github-action-eb-deploy/create-zip.yml
+    needs: [ preprocess-eb-environment ]
 
   deploy-staging:
     name: "Deploy Staging environments"
     uses: rewindio/github-action-eb-deploy/deploy-eb.yml
+    needs: [ create-deployment-zip ]
     with:
       deployment_environment_name: "staging"
       application_name: "My App Name"
