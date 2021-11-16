@@ -4,31 +4,37 @@ This repository has reusable workflows to drop the required boilerplate for depl
 
 ## Overall Usage
 
-In general, you will preprocess the environment, create the deployment zip, and then deploy the app. The steps here are laid out to assist you to populate your yaml properly to avoid the boilerplate that comes along with doing this in many repos.
+In general, you will preprocess the environment, create & deploy the deployment zip, and then deploy the app. The yml files noted in the headings below do this for you in this order. The steps below those are laid out to assist you to populate your yaml properly to avoid the boilerplate that comes along with doing this in many repos.
 
-### preprocess-eb-environment Usage
+## preprocess-eb-environment Usage
 
 This is a Github reusable workflow to set up the Elastic Beanstalk environment by cloning and copying in the extensions & hooks requested by the calling project.
 
-### create-zip Usage
+## pack-and-deploy-appversion Usage
 
-This is a GitHub reusable workflow that will package up a basic deployment zip for you
+This is a GitHub reusable workflow that will package up a basic single-gem zip for you and deploy the application version to Elastic Beanstalk.
 
-### preprocess-eb-environment.yml Usage
+## deploy-env.yml Usage
 
-This is a GitHub reusable workflow that will deploy the application for you, given the required inputs, and integrate with Slack on success or failure for notifications.
+This is a GitHub reusable workflow that will deploy a given application version to a specific environment for you. It integrates with Slack to send you notifications on success or failure.
 
-#### Required Inputs
+### Input Descriptions
 
-| Key | Value | Secret | Required |
-| ------------- | ------------- | ------------- | ------------- |
-| application_name | The name of the Elastic Beanstalk application to deploy to | No | Yes |
-| aws_region | The region to deploy to (default: us-east-1) | No | No |
-| deployment_environment_name | The deployment environment, either staging or production, for printing purposes only. | No | Yes |
-| environment_name_list | A JSON list of Elastic Beanstalk environment name. Must have escaped quotes on each list element. | No | Yes |
-| version_label | The Elastic Beanstalk version label | No | Yes |
-| EB_AWS_ACCESS_KEY_ID | The AWS Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
-| EB_AWS_SECRET_ACCESS_KEY | The AWS Secret Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
+| Key | Value |
+| ------------- | ------------- |
+| application_name | The name of the Elastic Beanstalk application to deploy to |
+| aws_region | The region to deploy to (default: us-east-1) |
+| environment_name_list | A JSON list of Elastic Beanstalk environment name. Must have escaped quotes on each list element. |
+| version_label | The Elastic Beanstalk version label |
+
+## Secret Description
+
+| Key | Value |
+| ------------- | ------------- |
+| BUNDLE_RUBYGEMS__PKG__GITHUB__COM |  |
+| BUNDLE_GEMS__CONTRIBSYS__COM | |
+| EB_AWS_ACCESS_KEY_ID | [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
+| EB_AWS_SECRET_ACCESS_KEY | The AWS Secret Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) |
 
 ## `workflow.yml` Example
 
@@ -41,30 +47,33 @@ on: push
 jobs:
   preprocess-eb-environment:
     name: "Preprocess EB environment"
-    uses: rewindio/github-action-eb-deploy/preprocess-eb-environment.yml
+    uses: rewindio/github-action-eb-deploy/preprocess-environment.yml@main
     secrets:
       # Please ensure the right-hand side is appropriately named for your repo &/ env
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
       CONTAINER_REGISTRY_PAT: ${{ secrets.CONTAINER_REGISTRY_PAT }}
 
-  create-deployment-zip:
-    name: "Create Deployment Zip"
-    uses: rewindio/github-action-eb-deploy/create-zip.yml
+   package-and-deploy-eb-app-version:
+    name: "Package & Deploy EB App Version"
+    uses: rewindio/github-action-eb-deploy/.github/workflows/pack-and-deploy-appversion.yml@main
     needs: [ preprocess-eb-environment ]
+    with:
+      application_name: "My App Name"
+      version_label: "my-version-label"
 
   deploy-staging:
     name: "Deploy Staging environments"
-    uses: rewindio/github-action-eb-deploy/deploy-eb.yml
-    needs: [ create-deployment-zip ]
+    uses: rewindio/github-action-eb-deploy/deploy-eb.yml@main
+    needs: [ package-and-deploy-eb-app-version ]
     with:
-      deployment_environment_name: "staging"
+      # Must match above, and please note that only `github` and `needs` variables are accessible here
+      # c.f.: https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
       application_name: "My App Name"
+      version_label: "my-version-label"
       aws_region: "us-east-2"
       # This must parse later as JSON, so we need to add escaped quotes on each element
       environment_name_matrix: "[ \"my-env-1\", \"my-env-2\" ]"
-      # Please note that only `github` and `needs` variables are accessible here
-      # c.f.: https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
     secrets:
       EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
       EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}

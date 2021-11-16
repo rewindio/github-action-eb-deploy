@@ -3,10 +3,6 @@ name: Deploy Elastic Beanstalk
 on:
   workflow_call:
     inputs:
-      deployment_environment_name:
-        description: "The deployment environment, either staging or production, for printing purposes only."
-        required: true
-        type: string
       application_name:
         description: "The name of the Elastic Beanstalk application to deploy to"
         required: true
@@ -77,7 +73,7 @@ jobs:
         with:
           status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ inputs.deployment_environment_name }} has {status_message}'
+          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.environment_name }} has {status_message}'
           message_format: >
             ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
           footer: '<{repo_url}|{repo}>'
@@ -91,7 +87,7 @@ jobs:
         with:
           status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ inputs.deployment_environment_name }} as {status_message}'
+          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.environment_name }} as {status_message}'
           message_format: >
             ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
           footer: '<{repo_url}|{repo}>'
