@@ -75,8 +75,8 @@ jobs:
       application_name: "My App Name"
       version_label: "my-version-label"
       aws_region: "us-east-2"
-      # This must parse later as JSON, so we need to add escaped quotes on each element
-      environment_name_matrix: "[ \"my-env-1\", \"my-env-2\" ]"
+      # This must parse later as JSON, so we need to use single quotes or add escape all nested double quotes
+      environment_name_matrix: '[ "my-env-1", "my-env-2" ]'
     secrets:
       EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
       EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
