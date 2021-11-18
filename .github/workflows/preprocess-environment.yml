@@ -2,6 +2,12 @@ name: Set-up ElasticBeanstalk Extensions
 
 on:
   workflow_call:
+    inputs:
+      docker_ruby_version:
+        description: "The version of Ruby to be used by the job container"
+        default: "2.6.8"
+        required: false
+        type: "string"
     secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
         required: true
@@ -17,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: rewindio/docker-amazonlinux2-ruby:2.6.8
+      image: rewindio/docker-amazonlinux2-ruby:${{ inputs.docker_ruby_version }}
 
     steps:
       - name: Checkout
