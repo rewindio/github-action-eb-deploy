@@ -1,26 +1,21 @@
-name: Create Elastic Beanstalk Deployment Zip
+name: Package and Upload Elastic Beanstalk Deployment Zip
 
 on:
   workflow_call:
     inputs:
-      application_name:
-        description: "The name of the Elastic Beanstalk application to deploy to"
-        required: true
-        type: string
-      aws_region:
-        description: "The region to deploy to"
-        default: "us-east-1"
-        required: false
-        type: string
-      version_label:
-        description: "The Elastic Beanstalk version label"
-        required: true
-        type: string
       docker_ruby_version:
         description: "The version of Ruby to be used by the job container"
         default: "2.6.8"
         required: false
         type: "string"
+      upload_matrix:
+        description: ""
+        required: true
+        type: string
+      version_label:
+        description: "The Elastic Beanstalk version label"
+        required: true
+        type: string
     secrets:
       EB_AWS_ACCESS_KEY_ID:
         required: true
@@ -80,24 +75,28 @@ jobs:
           path: deploy.zip
 
   deploy-elasticbeanstalk:
-      needs: [ create-deployment-zip ]
-      name: "Deploy Elastic Beanstalk"
-      runs-on: ubuntu-latest
-      steps:
-        - name: Download deployment artifact
-          uses: actions/download-artifact@v2
-          with:
-            name: eb-app-zip
-        - name: Upload application zip to S3 and create EB application version
-          uses: einaregilsson/beanstalk-deploy@v16
-          with:
-            aws_access_key: ${{ secrets.EB_AWS_ACCESS_KEY_ID }}
-            aws_secret_key: ${{ secrets.EB_AWS_SECRET_ACCESS_KEY }}
-            application_name: ${{ inputs.application_name }}
-            version_label: ${{ inputs.version_label }}
-            version_description: Commit ${{github.sha}} deployed by github actions
-            region: ${{ inputs.aws_region }}
-            deployment_package: deploy.zip
-            use_existing_version_if_available: true
-            wait_for_deployment: true
-            wait_for_environment_recovery: 60
+    needs: [ create-deployment-zip ]
+    name: "Deploy Elastic Beanstalk"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          ${{ fromJson(inputs.upload_matrix) }}
+    steps:
+      - name: Download deployment artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: eb-app-zip
+      - name: Upload application zip to S3 and create EB application version
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: ${{ secrets.EB_AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.EB_AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ matrix.app_name }}
+          version_label: ${{ inputs.version_label }}
+          version_description: Commit ${{github.sha}} deployed by github actions
+          region: ${{ matrix.region }}
+          deployment_package: deploy.zip
+          use_existing_version_if_available: true
+          wait_for_deployment: true
+          wait_for_environment_recovery: 60

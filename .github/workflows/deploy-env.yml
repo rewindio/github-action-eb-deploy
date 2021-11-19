@@ -3,17 +3,8 @@ name: Deploy Elastic Beanstalk
 on:
   workflow_call:
     inputs:
-      application_name:
-        description: "The name of the Elastic Beanstalk application to deploy to"
-        required: true
-        type: string
-      aws_region:
-        description: "The region to deploy to"
-        default: "us-east-1"
-        required: false
-        type: string
-      environment_name_list:
-        description: "A JSON list of Elastic Beanstalk environment name. Must have escaped quotes on each list element."
+      deploy_matrix:
+        description: "A JSON list of objects, each specifying the Elastic Beanstalk application and environment names, along with the region."
         required: true
         type: string
       version_label:
@@ -39,7 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment_name: ${{fromJson(inputs.environment_name_list)}}
+        include:
+          ${{ fromJson(inputs.deploy_matrix) }}
     steps:
       - name: Download deployment artifact
         uses: actions/download-artifact@v2
@@ -50,11 +42,11 @@ jobs:
         with:
           aws_access_key: ${{ secrets.EB_AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.EB_AWS_SECRET_ACCESS_KEY }}
-          application_name: ${{ inputs.application_name }}
-          environment_name: ${{ matrix.environment_name }}
+          application_name: ${{ matrix.app }}
+          environment_name: ${{ matrix.env }}
           version_label: ${{ inputs.version_label }} 
           version_description: Commit ${{github.sha}} deployed by github actions
-          region: ${{ inputs.aws_region }}
+          region: ${{ matrix.region }}
           deployment_package: deploy.zip
           use_existing_version_if_available: true
           wait_for_deployment: true
