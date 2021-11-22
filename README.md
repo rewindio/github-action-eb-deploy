@@ -86,7 +86,7 @@ jobs:
       # 1. It must parse as a valid JSON object list. Single-line matrices can use single-quotes (see above).
       # 2. Each object requires all three parameters, as of the current version.
       # 3. In order to avoid a race condition and inefficiencies, any app name that appears twice must exist
-      #      in the matrix of deployed app names above. Otherwise the second upload will crash the workflow.
+      #      in the matrix of uploaded app versions above. Otherwise the second upload will crash the workflow.
       # 4. Most variable contexts are not usable here -- only `github` and `needs` variables can be resolved.
       #      c.f.: https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
       deploy_matrix: |
