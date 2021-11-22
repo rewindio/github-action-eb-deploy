@@ -6,13 +6,14 @@ This repository has reusable workflows to drop the required boilerplate for depl
 
 In general, you will preprocess the environment, create & deploy the deployment zip, and then deploy the app. The yml files noted in the headings below do this for you in this order. The steps below those are laid out to assist you to populate your yaml properly to avoid the boilerplate that comes along with doing this in many repos.
 
-## preprocess-eb-environment.yml Usage
+## compile-artifact.yml Usage
 
-This is a Github reusable workflow to set up the Elastic Beanstalk environment by cloning and copying in the extensions & hooks requested by the calling project.
+This is a Github reusable workflow to set up the Elastic Beanstalk environment by cloning and copying in the extensions & hooks requested by the calling project, and then package up a basic single-gem zip, uploaded to GitHub as "eb-app-zip" with a filename of "deploy.zip".
 
-## pack-and-upload-appversion.yml Usage
+## upload-app-version.yml Usage
 
-This is a GitHub reusable workflow that will package up a basic single-gem zip for you and deploy the application version to the specified regions and names in Elastic Beanstalk.
+This is a GitHub reusable workflow that will and deploy the zip from the step above as an Elastic Beanstalk application version to the specified regions and names.  
+This will not result in a deployed application and must be run where deployments of two or more of the same application version are planned within a region. It is otherwise skippable for any region where only one environment will use a given application version.
 
 ## deploy-env.yml Usage
 
