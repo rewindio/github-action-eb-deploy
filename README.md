@@ -102,3 +102,7 @@ jobs:
       DEPLOY_FAILURES_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
       DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
       LOOKUP_USER_EMAIL_SLACK_TOKEN: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
+
+  # Production's job will match staging's but may benefit one extra line under the job heading, e.g.
+  # deploy-production:
+  #  if: github.ref == 'refs/heads/main' && github.event_name == 'push' # Only run on pushes to main
