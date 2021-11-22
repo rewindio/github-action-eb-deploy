@@ -9,7 +9,7 @@ on:
         required: false
         type: "string"
       upload_matrix:
-        description: ""
+        description: "A JSON list of objects, each specifying the Elastic Beanstalk application names and their region."
         required: true
         type: string
       version_label:
