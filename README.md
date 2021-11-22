@@ -46,9 +46,9 @@ name: Deployment
 on: push
 
 jobs:
-  preprocess-eb-environment:
-    name: "Preprocess EB environment"
-    uses: rewindio/github-action-eb-deploy/preprocess-environment.yml@v2.0.0
+  compile-artifact:
+    name: "Compile artifact zip"
+    uses: rewindio/github-action-eb-deploy/compile-artifact.yml@v2.0.0
     # You may specify the docker ruby version here
     # with:
     #   docker_ruby_version: "2.6.8" # Optional, this is the default
@@ -58,12 +58,14 @@ jobs:
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
       CONTAINER_REGISTRY_PAT: ${{ secrets.CONTAINER_REGISTRY_PAT }}
 
-   package-and-upload-eb-app-version:
-    name: "Package & Deploy EB App Version"
-    uses: rewindio/github-action-eb-deploy/.github/workflows/pack-and-upload-appversion.yml@v2.0.0
+   # You may skip this if and only if you never expect to deploy two environments on the same app version within a region
+   upload-app-version-staging:
+    name: "Upload app version(s)"
+    uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@v2.0.0
     needs: [ preprocess-eb-environment ]
     with:
-      # docker_ruby_version: 2.6.8 # Optional; this is the default
+      # Optional; this is the default
+      # docker_ruby_version: 2.6.8
 
       # This matrix must be a valid JSON object list. Use single quotes around a single line matrix.
       # Double quoting a single line matrix only works by escaping all inner quotes with a backslash (\).
@@ -104,6 +106,6 @@ jobs:
       DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
       LOOKUP_USER_EMAIL_SLACK_TOKEN: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
 
-  # Production's job will match staging's but may benefit one extra line under the job heading, e.g.
-  # deploy-production:
+  # In order to run for production, please repeat both of the final two job blocks above (upload & deploy)
+  # Under each job heading, consider also adding:
   #  if: github.ref == 'refs/heads/main' && github.event_name == 'push' # Only run on pushes to main

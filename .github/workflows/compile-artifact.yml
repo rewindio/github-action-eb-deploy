@@ -9,6 +9,11 @@ on:
         required: false
         type: "string"
     secrets:
+      EB_AWS_ACCESS_KEY_ID:
+        required: true
+      EB_AWS_SECRET_ACCESS_KEY:
+        required: true
+    secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
         required: true
       BUNDLE_GEMS__CONTRIBSYS__COM:
@@ -99,3 +104,53 @@ jobs:
         run:
           ./tmp/eb-platform-hooks/copy_hooks.rb --hooks_dir ./tmp/eb-platform-hooks/hooks
 
+  create-deployment-zip:
+    name: "Create Deployment Zip"
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: rewindio/docker-amazonlinux2-ruby:${{ inputs.docker_ruby_version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: bundle cache
+        uses: actions/cache@v2
+        id: bundle-cache
+        with:
+          path: |
+            vendor/cache
+            vendor/bundle
+          key: ${{ runner.os }}-bundle-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundle-
+
+      - name: extensions cache
+        uses: actions/cache@v2
+        id: extensions-cache
+        with:
+          path: .ebextensions
+          key: ${{ runner.os }}-extensions-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-extensions-${{ github.sha }}
+
+      - name: hooks cache
+        uses: actions/cache@v2
+        id: hooks-cache
+        with:
+          path: .platform
+          key: ${{ runner.os }}-extensions-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-platform-${{ github.sha }}
+
+      - name: Create zip
+        run:
+          zip -r deploy.zip . -x '*.git*' 'tmp/**' 'log/*.log' 'integration-tests/**'
+
+      - name: Archive application zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: eb-app-zip
+          path: deploy.zip
