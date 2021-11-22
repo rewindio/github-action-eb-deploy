@@ -31,8 +31,9 @@ This is a GitHub reusable workflow that will deploy a given application version 
 
 | Key | Value |
 | ------------- | ------------- |
-| BUNDLE_RUBYGEMS__PKG__GITHUB__COM |  |
-| BUNDLE_GEMS__CONTRIBSYS__COM | |
+| BUNDLE_RUBYGEMS__PKG__GITHUB__COM | Credentials for working with Ruby gems during the build phase |
+| BUNDLE_GEMS__CONTRIBSYS__COM | Credentials for working with Ruby gems during the build phase |
+| CONTAINER_REGISTRY_PAT | The token for the container registry, to work with private images |
 | EB_AWS_ACCESS_KEY_ID | [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
 | EB_AWS_SECRET_ACCESS_KEY | The AWS Secret Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) |
 
