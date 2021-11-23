@@ -49,7 +49,7 @@ on: push
 jobs:
   compile-artifact:
     name: "Compile artifact zip"
-    uses: rewindio/github-action-eb-deploy/compile-artifact.yml@v2.0.0
+    uses: rewindio/github-action-eb-deploy/.github/workflows/compile-artifact.yml@v2.0.0
     # You may specify the docker ruby version here
     # with:
     #   docker_ruby_version: "2.6.8" # Optional, this is the default
