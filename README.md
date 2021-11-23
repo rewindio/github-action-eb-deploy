@@ -79,7 +79,7 @@ jobs:
 
   deploy-staging:
     name: "Deploy Staging environments"
-    uses: rewindio/github-action-eb-deploy/deploy-eb.yml@v2.0.0
+    uses: rewindio/github-action-eb-deploy/deploy-env.yml@v2.0.0
     needs: [ package-and-upload-eb-app-version ]
     with:
       # Please note the following gotchas to working with this matrix
