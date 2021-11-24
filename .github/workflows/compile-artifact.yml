@@ -13,7 +13,6 @@ on:
         required: true
       EB_AWS_SECRET_ACCESS_KEY:
         required: true
-    secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
         required: true
       BUNDLE_GEMS__CONTRIBSYS__COM:
