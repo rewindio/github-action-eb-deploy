@@ -101,6 +101,7 @@ jobs:
 
   create-deployment-zip:
     name: "Create Deployment Zip"
+    needs: [ environment-setup ]
 
     runs-on: ubuntu-latest
 
