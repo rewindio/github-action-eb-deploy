@@ -49,7 +49,8 @@ on: push
 jobs:
   compile-artifact:
     name: "Compile artifact zip"
-    uses: rewindio/github-action-eb-deploy/.github/workflows/compile-artifact.yml@v2.0.0
+    # Please replace all X.Y.Z values with the latest tag
+    uses: rewindio/github-action-eb-deploy/.github/workflows/compile-artifact.yml@vX.Y.Z
     # You may specify the docker ruby version here
     # with:
     #   docker_ruby_version: "2.6.8" # Optional, this is the default
@@ -62,7 +63,7 @@ jobs:
    # You may skip this if and only if you never expect to deploy two environments on the same app version within a region
    upload-app-version-staging:
     name: "Upload app version(s)"
-    uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@v2.0.0
+    uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@vX.Y.Z
     needs: [ preprocess-eb-environment ]
     with:
       # Optional; this is the default
@@ -79,7 +80,7 @@ jobs:
 
   deploy-staging:
     name: "Deploy Staging environments"
-    uses: rewindio/github-action-eb-deploy/deploy-env.yml@v2.0.0
+    uses: rewindio/github-action-eb-deploy/deploy-env.yml@vX.Y.Z
     needs: [ package-and-upload-eb-app-version ]
     with:
       # Please note the following gotchas to working with this matrix
