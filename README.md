@@ -6,34 +6,35 @@ This repository has reusable workflows to drop the required boilerplate for depl
 
 In general, you will preprocess the environment, create & deploy the deployment zip, and then deploy the app. The yml files noted in the headings below do this for you in this order. The steps below those are laid out to assist you to populate your yaml properly to avoid the boilerplate that comes along with doing this in many repos.
 
-## preprocess-eb-environment.yml Usage
+## compile-artifact.yml Usage
 
-This is a Github reusable workflow to set up the Elastic Beanstalk environment by cloning and copying in the extensions & hooks requested by the calling project.
+This is a Github reusable workflow to set up the Elastic Beanstalk environment by cloning and copying in the extensions & hooks requested by the calling project, and then package up a basic single-gem zip, uploaded to GitHub as "eb-app-zip" with a filename of "deploy.zip".
 
-## pack-and-deploy-appversion.yml Usage
+## upload-app-version.yml Usage
 
-This is a GitHub reusable workflow that will package up a basic single-gem zip for you and deploy the application version to Elastic Beanstalk.
+This is a GitHub reusable workflow that will and deploy the zip from the step above as an Elastic Beanstalk application version to the specified regions and names.  
+This will not result in a deployed application and must be run where deployments of two or more of the same application version are planned within a region. It is otherwise skippable for any region where only one environment will use a given application version.
 
 ## deploy-env.yml Usage
 
-This is a GitHub reusable workflow that will deploy a given application version to a specific environment for you. It integrates with Slack to send you notifications on success or failure.
+This is a GitHub reusable workflow that will deploy a given application version to a set of environments for you. It integrates with Slack to send you notifications on success or failure.
 
 ### Input Descriptions
 
 | Key | Value |
 | ------------- | ------------- |
-| application_name | The name of the Elastic Beanstalk application to deploy to |
-| aws_region | The region to deploy to (default: us-east-1) |
+| deploy_matrix | A JSON list of objects, each specifying the Elastic Beanstalk application and environment names, along with the region. See the example yml for details. |
+| upload_matrix | A JSON list of objects, each specifying the Elastic Beanstalk application names and their region.  See the example yml for details. |
 | docker_ruby_version | The version of Ruby to be used by the job container. |
-| environment_name_list | A JSON list of Elastic Beanstalk environment names to deploy the application into. They must all be in one region. |
 | version_label | The Elastic Beanstalk version label |
 
 ## Secret Description
 
 | Key | Value |
 | ------------- | ------------- |
-| BUNDLE_RUBYGEMS__PKG__GITHUB__COM |  |
-| BUNDLE_GEMS__CONTRIBSYS__COM | |
+| BUNDLE_RUBYGEMS__PKG__GITHUB__COM | Credentials for working with Ruby gems during the build phase |
+| BUNDLE_GEMS__CONTRIBSYS__COM | Credentials for working with Ruby gems during the build phase |
+| CONTAINER_REGISTRY_PAT | The token for the container registry, to work with private images |
 | EB_AWS_ACCESS_KEY_ID | [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
 | EB_AWS_SECRET_ACCESS_KEY | The AWS Secret Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) |
 
@@ -42,13 +43,13 @@ This is a GitHub reusable workflow that will deploy a given application version 
 Place in a `.yml` file such as this one in your `.github/workflows` folder. [Refer to the documentation on workflow YAML syntax here.](https://help.github.com/en/articles/workflow-syntax-for-github-actions)
 
 ```yaml
-name: Deploy
+name: Deployment
 on: push
 
 jobs:
-  preprocess-eb-environment:
-    name: "Preprocess EB environment"
-    uses: rewindio/github-action-eb-deploy/preprocess-environment.yml@v1.0.1
+  compile-artifact:
+    name: "Compile artifact zip"
+    uses: rewindio/github-action-eb-deploy/.github/workflows/compile-artifact.yml@v2.0.0
     # You may specify the docker ruby version here
     # with:
     #   docker_ruby_version: "2.6.8" # Optional, this is the default
@@ -58,13 +59,19 @@ jobs:
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
       CONTAINER_REGISTRY_PAT: ${{ secrets.CONTAINER_REGISTRY_PAT }}
 
-   package-and-deploy-eb-app-version:
-    name: "Package & Deploy EB App Version"
-    uses: rewindio/github-action-eb-deploy/.github/workflows/pack-and-deploy-appversion.yml@v1.0.1
+   # You may skip this if and only if you never expect to deploy two environments on the same app version within a region
+   upload-app-version-staging:
+    name: "Upload app version(s)"
+    uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@v2.0.0
     needs: [ preprocess-eb-environment ]
     with:
-      application_name: "My App Name"
-      # docker_ruby_version: 2.6.8 # Optional; this is the default
+      # Optional; this is the default
+      # docker_ruby_version: 2.6.8
+
+      # This matrix must be a valid JSON object list. Use single quotes around a single line matrix.
+      # Double quoting a single line matrix only works by escaping all inner quotes with a backslash (\).
+      # The objects must have 'app' name and 'region'. For more complex matrices, see the comments below.
+      upload_matrix: '[ { "app" : "MyApp", region: "us-east-1" } ]'
       version_label: "my-version-label"
     secrets:
       EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
@@ -72,17 +79,26 @@ jobs:
 
   deploy-staging:
     name: "Deploy Staging environments"
-    uses: rewindio/github-action-eb-deploy/deploy-eb.yml@v1.0.1
-    needs: [ package-and-deploy-eb-app-version ]
+    uses: rewindio/github-action-eb-deploy/deploy-env.yml@v2.0.0
+    needs: [ package-and-upload-eb-app-version ]
     with:
-      # Must match above, and please note that only `github` and `needs` variables are accessible here
-      # c.f.: https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
-      application_name: "My App Name"
-      # Must match above
+      # Please note the following gotchas to working with this matrix
+      # 1. It must parse as a valid JSON object list. Single-line matrices can use single-quotes (see above).
+      # 2. Each object requires all three parameters, as of the current version.
+      # 3. In order to avoid a race condition and inefficiencies, any app name that appears twice must exist
+      #      in the matrix of uploaded app versions above. Otherwise the second upload will crash the workflow.
+      # 4. Most variable contexts are not usable here -- only `github` and `needs` variables can be resolved.
+      #      c.f.: https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
+      deploy_matrix: |
+        [
+          { "app": "MyApp", "env": "my-env-1", region: "us-east-1" },
+          { "app": "MyApp", "env": "my-env-2", region: "us-east-2" },
+          { "app": "MyApp", "env": "my-env-3", region: "ca-central-1" },
+          { "app": "YourApp", "env": "my-env-4", region: "eu-west-2" },
+          { "app": "TheirApp", "env": "my-env-5", region: "eu-east-1" },
+        ]
+      # This should match the above
       version_label: "my-version-label"
-      aws_region: "us-east-2"
-      # This must parse later as JSON, so we need to use single quotes or add escape all nested double quotes
-      environment_name_matrix: '[ "my-env-1", "my-env-2" ]'
     secrets:
       EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
       EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
@@ -90,3 +106,7 @@ jobs:
       DEPLOY_FAILURES_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
       DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
       LOOKUP_USER_EMAIL_SLACK_TOKEN: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
+
+  # In order to run for production, please repeat both of the final two job blocks above (upload & deploy)
+  # Under each job heading, consider also adding:
+  #  if: github.ref == 'refs/heads/main' && github.event_name == 'push' # Only run on pushes to main
