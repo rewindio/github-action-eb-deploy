@@ -9,10 +9,6 @@ on:
         required: false
         type: "string"
     secrets:
-      EB_AWS_ACCESS_KEY_ID:
-        required: true
-      EB_AWS_SECRET_ACCESS_KEY:
-        required: true
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
         required: true
       BUNDLE_GEMS__CONTRIBSYS__COM:
