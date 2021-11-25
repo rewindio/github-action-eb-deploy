@@ -4,27 +4,23 @@ This repository has reusable workflows to drop the required boilerplate for depl
 
 ## Overall Usage
 
-In general, you will preprocess the environment, create & deploy the deployment zip, and then deploy the app. The yml files noted in the headings below do this for you in this order. The steps below those are laid out to assist you to populate your yaml properly to avoid the boilerplate that comes along with doing this in many repos.
+In general, you will compile the artifact, optionally upload the deployment zip within a region as an app version, and then deploy the app version to environments. The yml files noted in the headings below do this for you in this order. The steps below those are laid out to assist you to populate your yaml properly to avoid the boilerplate that comes along with doing this in many repos.
 
 ## compile-artifact.yml Usage
 
 This is a Github reusable workflow to set up the Elastic Beanstalk environment by cloning and copying in the extensions & hooks requested by the calling project, and then package up a basic single-gem zip, uploaded to GitHub as "eb-app-zip" with a filename of "deploy.zip".
 
-## upload-app-version.yml Usage
-
-This is a GitHub reusable workflow that will and deploy the zip from the step above as an Elastic Beanstalk application version to the specified regions and names.  
-This will not result in a deployed application and must be run where deployments of two or more of the same application version are planned within a region. It is otherwise skippable for any region where only one environment will use a given application version.
-
 ## deploy-env.yml Usage
 
 This is a GitHub reusable workflow that will deploy a given application version to a set of environments for you. It integrates with Slack to send you notifications on success or failure.
+
+It is also used for pre-loading app versions within a region. Simply omit the "env" parameter to achieve this.
 
 ### Input Descriptions
 
 | Key | Value |
 | ------------- | ------------- |
 | deploy_matrix | A JSON list of objects, each specifying the Elastic Beanstalk application and environment names, along with the region. See the example yml for details. |
-| upload_matrix | A JSON list of objects, each specifying the Elastic Beanstalk application names and their region.  See the example yml for details. |
 | docker_ruby_version | The version of Ruby to be used by the job container. |
 | version_label | The Elastic Beanstalk version label |
 
