@@ -49,6 +49,7 @@ on: push
 jobs:
   compile-artifact:
     name: "Compile artifact zip"
+
     # Please replace all X.Y.Z values with the latest tag
     uses: rewindio/github-action-eb-deploy/.github/workflows/compile-artifact.yml@vX.Y.Z
     # You may specify the docker ruby version here
@@ -63,8 +64,9 @@ jobs:
    # You may skip this if and only if you never expect to deploy two environments on the same app version within a region
    upload-app-version-staging:
     name: "Upload app version(s) to staging"
-    uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@vX.Y.Z
     needs: [ compile-artifact ]
+
+    uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@vX.Y.Z
     with:
       # Optional; this is the default
       # docker_ruby_version: 2.6.8
@@ -80,8 +82,9 @@ jobs:
 
   deploy-staging:
     name: "Deploy staging environments"
-    uses: rewindio/github-action-eb-deploy/deploy-env.yml@vX.Y.Z
     needs: [ upload-app-version-staging ] # or depend directly on compile-artifact, if skipping this
+
+    uses: rewindio/github-action-eb-deploy/deploy-env.yml@vX.Y.Z
     with:
       # Please note the following gotchas to working with this matrix
       # 1. It must parse as a valid JSON object list. Single-line matrices can use single-quotes (see above).
