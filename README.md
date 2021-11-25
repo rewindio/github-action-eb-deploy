@@ -62,7 +62,7 @@ jobs:
 
    # You may skip this if and only if you never expect to deploy two environments on the same app version within a region
    upload-app-version-staging:
-    name: "Upload app version(s)"
+    name: "Upload app version(s) to staging"
     uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@vX.Y.Z
     needs: [ compile-artifact ]
     with:
@@ -79,7 +79,7 @@ jobs:
       EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
 
   deploy-staging:
-    name: "Deploy Staging environments"
+    name: "Deploy staging environments"
     uses: rewindio/github-action-eb-deploy/deploy-env.yml@vX.Y.Z
     needs: [ upload-app-version-staging ] # or depend directly on compile-artifact, if skipping this
     with:
