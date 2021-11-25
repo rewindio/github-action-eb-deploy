@@ -12,7 +12,7 @@ This is a Github reusable workflow to set up the Elastic Beanstalk environment b
 
 ## upload-app-version.yml Usage
 
-This is a GitHub reusable workflow that will and deploy the zip from the step above as an Elastic Beanstalk application version to the specified regions and names.
+This is a GitHub reusable workflow that will and deploy the zip from the step above as an Elastic Beanstalk application version to the specified regions and names.  
 This will not result in a deployed application and must be run where deployments of two or more of the same application version are planned within a region. It is otherwise skippable for any region where only one environment will use a given application version.
 
 ## deploy-env.yml Usage
