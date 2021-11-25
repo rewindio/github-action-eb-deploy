@@ -14,7 +14,7 @@ This is a Github reusable workflow to set up the Elastic Beanstalk environment b
 
 This is a GitHub reusable workflow that will deploy a given application version to a set of environments for you. It integrates with Slack to send you notifications on success or failure.
 
-It is also used for pre-loading app versions within a region. Simply omit the "env" parameter to achieve this.
+It is also used for pre-loading app versions within a region. This is done by reducing the "env" column from your intended deploy_matrix and keeping one copy of any row which appears twice or more. The hard example below will make this computation far clearer.
 
 ### Input Descriptions
 
@@ -46,34 +46,36 @@ jobs:
   compile-artifact:
     name: "Compile artifact zip"
 
-    # Please replace all X.Y.Z values with the latest tag
+    # Please replace all X.Y.Z values with the latest tag.
     uses: rewindio/github-action-eb-deploy/.github/workflows/compile-artifact.yml@vX.Y.Z
-    # You may specify the docker ruby version here
+    # You may specify the docker ruby version here.
     # with:
     #   docker_ruby_version: "2.6.8" # Optional, this is the default
     secrets:
-      # Please ensure the right-hand side is appropriately named for your repo &/ env
+      # Please ensure the right-hand side is appropriately named for your repo &/ env.
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
       CONTAINER_REGISTRY_PAT: ${{ secrets.CONTAINER_REGISTRY_PAT }}
 
-   # SKIP THIS IF: your deploy matrix below does not have rows which only differ in the "env" column
+   # SKIP THIS IF: your deploy matrix below does not have rows which only differ in the "env" column.
    upload-app-version-staging:
     name: "Upload app version(s) to staging"
     needs: [ compile-artifact ]
 
-    # NOTE: this yml is the same as the deploy below. The only difference is that we don't pass in any "environment"
+    # NOTE: this yml is the same workflow as the deploy below, it is simply the "deploy_matrix" usage that changes.
     uses: rewindio/github-action-eb-deploy/deploy-env.yml@vX.Y.Z
     with:
       # This matrix must be a valid JSON object list. Use single quotes around a single line matrix.
       # Double quoting a single line matrix only works by escaping all inner quotes with a backslash (\).
       # The objects must have 'app' name and 'region'. For more complex matrices, see the comments below.
+      #
+      # We submit the MyApp within us-east-1 here because it is used twice (or more) below in the final deploy_matrix.
       deploy_matrix: '[ { "app" : "MyApp", region: "us-east-1" } ]'
       version_label: "my-version-label"
     secrets:
       EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
       EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
-      # Secrets are not accessible unless they are shared, so we need these three even though they are redundant
+      # Secrets are not accessible unless they are shared, so we need these three even though they are redundant.
       DEPLOY_FAILURES_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
       DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
       LOOKUP_USER_EMAIL_SLACK_TOKEN: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
@@ -108,6 +110,7 @@ jobs:
       DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
       LOOKUP_USER_EMAIL_SLACK_TOKEN: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
 
-  # In order to run for production, please repeat both of the final two job blocks above (upload & deploy)
-  # Under each job heading, consider also adding:
+  # In order to run for production, please repeat both of the final two job blocks above (upload & deploy).
+  #
+  # Under each prod job heading, consider also adding:
   #  if: github.ref == 'refs/heads/main' && github.event_name == 'push' # Only run on pushes to main
