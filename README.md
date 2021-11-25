@@ -96,7 +96,7 @@ jobs:
       deploy_matrix: |
         [
           { "app": "MyApp", "env": "my-env-1", region: "us-east-1" },
-          { "app": "MyApp", "env": "my-env-2", region: "us-east-2" },
+          { "app": "MyApp", "env": "my-env-2", region: "us-east-1" },
           { "app": "MyApp", "env": "my-env-3", region: "ca-central-1" },
           { "app": "YourApp", "env": "my-env-4", region: "eu-west-2" },
           { "app": "TheirApp", "env": "my-env-5", region: "eu-east-1" },
