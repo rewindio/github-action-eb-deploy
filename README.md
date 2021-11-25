@@ -64,7 +64,7 @@ jobs:
    upload-app-version-staging:
     name: "Upload app version(s)"
     uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@vX.Y.Z
-    needs: [ preprocess-eb-environment ]
+    needs: [ compile-artifact ]
     with:
       # Optional; this is the default
       # docker_ruby_version: 2.6.8
