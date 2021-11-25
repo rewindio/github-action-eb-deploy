@@ -12,7 +12,7 @@ This is a Github reusable workflow to set up the Elastic Beanstalk environment b
 
 ## upload-app-version.yml Usage
 
-This is a GitHub reusable workflow that will and deploy the zip from the step above as an Elastic Beanstalk application version to the specified regions and names.  
+This is a GitHub reusable workflow that will and deploy the zip from the step above as an Elastic Beanstalk application version to the specified regions and names.
 This will not result in a deployed application and must be run where deployments of two or more of the same application version are planned within a region. It is otherwise skippable for any region where only one environment will use a given application version.
 
 ## deploy-env.yml Usage
@@ -61,24 +61,26 @@ jobs:
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.CONTRIBSYS_TOKEN }}
       CONTAINER_REGISTRY_PAT: ${{ secrets.CONTAINER_REGISTRY_PAT }}
 
-   # You may skip this if and only if you never expect to deploy two environments on the same app version within a region
+   # SKIP THIS IF: your deploy matrix below does not have rows which only differ in the "env" column
    upload-app-version-staging:
     name: "Upload app version(s) to staging"
     needs: [ compile-artifact ]
 
-    uses: rewindio/github-action-eb-deploy/.github/workflows/upload-app-version.yml@vX.Y.Z
+    # NOTE: this yml is the same as the deploy below. The only difference is that we don't pass in any "environment"
+    uses: rewindio/github-action-eb-deploy/deploy-env.yml@vX.Y.Z
     with:
-      # Optional; this is the default
-      # docker_ruby_version: 2.6.8
-
       # This matrix must be a valid JSON object list. Use single quotes around a single line matrix.
       # Double quoting a single line matrix only works by escaping all inner quotes with a backslash (\).
       # The objects must have 'app' name and 'region'. For more complex matrices, see the comments below.
-      upload_matrix: '[ { "app" : "MyApp", region: "us-east-1" } ]'
+      deploy_matrix: '[ { "app" : "MyApp", region: "us-east-1" } ]'
       version_label: "my-version-label"
     secrets:
       EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
       EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
+      # Secrets are not accessible unless they are shared, so we need these three even though they are redundant
+      DEPLOY_FAILURES_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
+      DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
+      LOOKUP_USER_EMAIL_SLACK_TOKEN: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
 
   deploy-staging:
     name: "Deploy staging environments"
@@ -101,12 +103,11 @@ jobs:
           { "app": "YourApp", "env": "my-env-4", region: "eu-west-2" },
           { "app": "TheirApp", "env": "my-env-5", region: "eu-east-1" },
         ]
-      # This should match the above
-      version_label: "my-version-label"
+      # Note in the above matrix that the first two rows only differ in the "env" column. This is why we need the step above.
+      version_label: "my-version-label" # Ignoring edge-cases, this must match the above
     secrets:
       EB_AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
       EB_AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
-      # Secrets are not accessible unless they are shared, so we need these three even though they are redundant
       DEPLOY_FAILURES_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
       DEPLOY_SUCCESS_SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
       LOOKUP_USER_EMAIL_SLACK_TOKEN: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
