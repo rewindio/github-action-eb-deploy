@@ -81,7 +81,7 @@ jobs:
   deploy-staging:
     name: "Deploy Staging environments"
     uses: rewindio/github-action-eb-deploy/deploy-env.yml@vX.Y.Z
-    needs: [ package-and-upload-eb-app-version ]
+    needs: [ upload-app-version-staging ] # or depend directly on compile-artifact, if skipping this
     with:
       # Please note the following gotchas to working with this matrix
       # 1. It must parse as a valid JSON object list. Single-line matrices can use single-quotes (see above).
