@@ -56,7 +56,7 @@ jobs:
         # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
         continue-on-error: true
         run: |
-          COMMIT_TITLE="$(echo '''${{ github.event.head_commit.message }}''' | head)"
+          COMMIT_TITLE="$(echo '''${{ github.event.head_commit.message }}''' | head -n 1)"
           echo "COMMIT_TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
 
       - name: Notify Slack on Success
