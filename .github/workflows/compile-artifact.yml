@@ -10,10 +10,13 @@ on:
         type: "string"
     secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
+        description: "Credentials for working with Ruby gems during the build phase"
         required: true
       BUNDLE_GEMS__CONTRIBSYS__COM:
+        description: "Credentials for working with Ruby gems during the build phase"
         required: true
       CONTAINER_REGISTRY_PAT:
+        description: "The token for the container registry, to work with private images"
         required: true
 
 jobs:
