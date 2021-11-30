@@ -27,13 +27,13 @@ on:
         description: "The AWS Secret Access Key you would like to deploy with (e.g. prod or staging)"
         required: true
       DEPLOY_FAILURES_SLACK_WEBHOOK_URL:
-        description: "The channel to message in on failures"
+        description: "The Slack webhook url that maps to a Slack channel. This channel will be notified after a failed deploy."
         required: true
       DEPLOY_SUCCESS_SLACK_WEBHOOK_URL:
-        description: "The channel to message in on successes"
+        description: "The Slack webhook url that maps to a Slack channel. This channel will be notified after a successful deploy."
         required: true
       LOOKUP_USER_EMAIL_SLACK_TOKEN:
-        description: "A token to look up users by email - not guaranteed to work for Orgs"
+        description: "A token to look up users by email and message them directly. This requires the GitHub & Slack email to match, and the 'Keep my email addresses private' option disabled. No failures occur in other cases."
         required: true
       # Optional secrets
       HONEYBADGER_JS_API_KEY:
