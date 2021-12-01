@@ -10,9 +10,11 @@ on:
         type: "string"
     secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
-        required: true
+        description: "The personal access token to download Ruby gems from GitHub"
+        required: false
       BUNDLE_GEMS__CONTRIBSYS__COM:
-        required: true
+        description: "The access token for ContribSys.com's Sidekiq / faktory gems" 
+        required: false
       CONTAINER_REGISTRY_PAT:
         required: true
 
