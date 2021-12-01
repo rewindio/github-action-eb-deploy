@@ -38,7 +38,7 @@ jobs:
         with:
           name: eb-app-zip
       - name: Upload application zip to S3 and create EB application version
-        uses: rewindio/beanstalk-deploy@v19-beta1
+        uses: einaregilsson/beanstalk-deploy@v19
         with:
           aws_access_key: ${{ secrets.EB_AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.EB_AWS_SECRET_ACCESS_KEY }}
