@@ -138,6 +138,7 @@ jobs:
         uses: honeybadger-io/github-notify-deploy-action@v1
         with:
           api_key: ${{ secrets.HONEYBADGER_JS_API_KEY }}
+          environment: ${{ matrix.env }}
 
       - name: Mark Release in New Relic
         if: inputs.notify_new_relic == true
