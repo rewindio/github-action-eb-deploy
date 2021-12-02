@@ -16,6 +16,7 @@ on:
         description: "The access token for ContribSys.com's Sidekiq / faktory gems" 
         required: false
       CONTAINER_REGISTRY_PAT:
+        description: "The token for the container registry, to work with private images"
         required: true
 
 jobs:
@@ -145,7 +146,7 @@ jobs:
 
       - name: Create zip
         run:
-          zip -r deploy.zip . -x '*.git*' 'tmp/**' 'log/*.log' 'integration-tests/**'
+          zip -r deploy.zip . -x '*.git*' 'log/*.log' 'integration-tests/**'
 
       - name: Archive application zip
         uses: actions/upload-artifact@v2
