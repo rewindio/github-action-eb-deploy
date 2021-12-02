@@ -16,23 +16,9 @@ This is a GitHub reusable workflow that will deploy a given application version 
 
 It is also used for pre-loading app versions within a region. This is done by reducing the "env" column from your intended deploy_matrix and keeping one copy of any row which appears twice or more. The hard example below will make this computation far clearer.
 
-### Input Descriptions
+### Inputs & Secrets
 
-| Key | Value |
-| ------------- | ------------- |
-| deploy_matrix | A JSON list of objects, each specifying the Elastic Beanstalk application and environment names, along with the region. See the example yml for details. |
-| docker_ruby_version | The version of Ruby to be used by the job container. |
-| version_label | The Elastic Beanstalk version label |
-
-## Secret Description
-
-| Key | Value |
-| ------------- | ------------- |
-| BUNDLE_RUBYGEMS__PKG__GITHUB__COM | Credentials for working with Ruby gems during the build phase |
-| BUNDLE_GEMS__CONTRIBSYS__COM | Credentials for working with Ruby gems during the build phase |
-| CONTAINER_REGISTRY_PAT | The token for the container registry, to work with private images |
-| EB_AWS_ACCESS_KEY_ID | [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) | Yes | Yes |
-| EB_AWS_SECRET_ACCESS_KEY | The AWS Secret Access Key. [More info here.](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) |
+Each yml requires specific inputs and secrets. Please read the inputs and secrets list in the yml you are looking to use for descriptions and whether or not they are required for execution.
 
 ## `workflow.yml` Example
 
