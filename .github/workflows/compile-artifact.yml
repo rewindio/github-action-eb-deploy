@@ -9,7 +9,7 @@ on:
         required: false
         type: "string"
       gemfile_suffix:
-        description: "The suffix to add to the Gemfile (for multi-gem projects)"
+        description: "The suffix to add to the Gemfile (for multi-gem projects). Should begin with '.' if your Gemfile is named 'Gemfile.foo'."
         default: ""
         required: false
         type: "string"
