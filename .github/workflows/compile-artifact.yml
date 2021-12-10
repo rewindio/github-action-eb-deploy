@@ -8,6 +8,12 @@ on:
         default: "2.6.8"
         required: false
         type: "string"
+      gemfile_suffix:
+        description: "The suffix to add to the Gemfile (for multi-gem projects)"
+        default: ""
+        required: false
+        type: "string"
+
     secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
         description: "Credentials for working with Ruby gems during the build phase"
@@ -35,7 +41,8 @@ jobs:
       - name: Configure bundler
         run: |
           mkdir -p vendor/bundle
-          bundle config path vendor/bundle
+          bundle config set --local path vendor/bundle
+          bundle config set --local gemfile Gemfile${{ inputs.gemfile_suffix }}
 
       - name: bundle cache
         uses: actions/cache@v2
