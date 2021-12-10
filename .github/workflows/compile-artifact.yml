@@ -51,7 +51,7 @@ jobs:
           path: |
             vendor/cache
             vendor/bundle
-          key: ${{ runner.os }}-bundle-${{ hashFiles(format('**/{0}.lock', env.BUNDLE_GEMFILE)) }}
+          key: ${{ runner.os }}-bundle-${{ hashFiles(format('**/{0}.lock', "Gemfile${{inputs.gemfile_suffix}}" )) }}
           restore-keys: |
             ${{ runner.os }}-bundle-
 
