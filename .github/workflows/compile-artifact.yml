@@ -51,6 +51,7 @@ jobs:
           path: |
             vendor/cache
             vendor/bundle
+          # Note: 'Gemfile.lock' does not have a suffix, therefore we do not use {0}.{1}.lock
           key: ${{ runner.os }}-bundle-${{ hashFiles(format('**/{0}{1}.lock', 'Gemfile', inputs.gemfile_suffix )) }}
           restore-keys: |
             ${{ runner.os }}-bundle-
