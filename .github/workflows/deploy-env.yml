@@ -78,74 +78,74 @@ jobs:
           wait_for_deployment: true
           wait_for_environment_recovery: 60
 
-#      - name: Set commit title
-#        # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
-#        continue-on-error: true
-#        run: |
-#          COMMIT_TITLE="$(echo '''${{ github.event.head_commit.message }}''' | head -n 1)"
-#          echo "COMMIT_TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
-#
-     # - name: Notify Slack on Success
-     #   uses: ravsamhq/notify-slack-action@v1
-     #   if: always()
-     #   with:
-     #     status: ${{ job.status }}
-     #     token: ${{ secrets.GITHUB_TOKEN }}
-     #     notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.app }} in ${{ matrix.region }} (${{ matrix.env }}) has {status_message}'
-     #     message_format: >
-     #       ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
-     #     footer: '<{repo_url}|{repo}>'
-     #     notify_when: 'success'
-     #   env:
-     #     SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
+      - name: Set commit title
+        # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+        continue-on-error: true
+        run: |
+          COMMIT_TITLE="$(echo '''${{ github.event.head_commit.message }}''' | head -n 1)"
+          echo "COMMIT_TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
 
-     # - name: Notify Slack on Failure
-     #   uses: ravsamhq/notify-slack-action@v1
-     #   if: always()
-     #   with:
-     #     status: ${{ job.status }}
-     #     token: ${{ secrets.GITHUB_TOKEN }}
-     #     notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.app }} in ${{ matrix.region }} (${{ matrix.env }}) has {status_message}'
-     #     message_format: >
-     #       ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
-     #     footer: '<{repo_url}|{repo}>'
-     #     notify_when: 'failure'
-     #   env:
-     #     SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
+      - name: Notify Slack on Success
+        uses: ravsamhq/notify-slack-action@v1
+        if: always()
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.app }} in ${{ matrix.region }} (${{ matrix.env }}) has {status_message}'
+          message_format: >
+            ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
+          footer: '<{repo_url}|{repo}>'
+          notify_when: 'success'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
 
-     # - name: Find Slack user
-     #   if: failure()
-     #   id: find-slack-user
-     #   uses: scribd/find-slack-user-action@v1
-     #   with:
-     #     include-at-symbol: true
-     #     slack-token: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
+      - name: Notify Slack on Failure
+        uses: ravsamhq/notify-slack-action@v1
+        if: always()
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.app }} in ${{ matrix.region }} (${{ matrix.env }}) has {status_message}'
+          message_format: >
+            ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
+          footer: '<{repo_url}|{repo}>'
+          notify_when: 'failure'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_FAILURES_SLACK_WEBHOOK_URL }}
 
-     # - name: Send a Slack DM to the user linking the failure
-     #   if: failure()
-     #   uses: archive/github-actions-slack@v2.2.1
-     #   with:
-     #     slack-function: send-message
-     #     slack-bot-user-oauth-access-token: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
-     #     slack-channel: "${{ steps.find-slack-user.outputs.username }}"
-     #     slack-text: |
-     #       <@${{ steps.find-slack-user.outputs.member-id }}>: <${{ env.RUN_URL }}|${{ env.COMMIT_TITLE }}> has failed.
-     #   env:
-     #     RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - name: Find Slack user
+        if: failure()
+        id: find-slack-user
+        uses: scribd/find-slack-user-action@v1
+        with:
+          include-at-symbol: true
+          slack-token: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
 
-     # - name: Mark Release in HoneyBadger
-     #   if: inputs.notify_honeybadger == true
-     #   uses: honeybadger-io/github-notify-deploy-action@v1
-     #   with:
-     #     api_key: ${{ secrets.HONEYBADGER_JS_API_KEY }}
-     #     environment: ${{ matrix.env }}
+      - name: Send a Slack DM to the user linking the failure
+        if: failure()
+        uses: archive/github-actions-slack@v2.2.1
+        with:
+          slack-function: send-message
+          slack-bot-user-oauth-access-token: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
+          slack-channel: "${{ steps.find-slack-user.outputs.username }}"
+          slack-text: |
+            <@${{ steps.find-slack-user.outputs.member-id }}>: <${{ env.RUN_URL }}|${{ env.COMMIT_TITLE }}> has failed.
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-     # - name: Mark Release in New Relic
-     #   if: inputs.notify_new_relic == true
-     #   uses: newrelic/deployment-marker-action@v1
-     #   with:
-     #     apiKey: ${{ secrets.NEW_RELIC_API_KEY }}
-     #     accountId: ${{ secrets.NEW_RELIC_ACCOUNT_ID }}
-     #     applicationId: ${{ secrets.NEW_RELIC_APPLICATION_ID }}
-     #     revision: "${{ github.ref }}-${{ github.sha }}"
-     #     user: "${{ github.actor }}"
+      - name: Mark Release in HoneyBadger
+        if: inputs.notify_honeybadger == true
+        uses: honeybadger-io/github-notify-deploy-action@v1
+        with:
+          api_key: ${{ secrets.HONEYBADGER_JS_API_KEY }}
+          environment: ${{ matrix.env }}
+
+      - name: Mark Release in New Relic
+        if: inputs.notify_new_relic == true
+        uses: newrelic/deployment-marker-action@v1
+        with:
+          apiKey: ${{ secrets.NEW_RELIC_API_KEY }}
+          accountId: ${{ secrets.NEW_RELIC_ACCOUNT_ID }}
+          applicationId: ${{ secrets.NEW_RELIC_APPLICATION_ID }}
+          revision: "${{ github.ref }}-${{ github.sha }}"
+          user: "${{ github.actor }}"
