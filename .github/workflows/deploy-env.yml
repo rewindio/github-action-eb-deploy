@@ -82,9 +82,9 @@ jobs:
       - name: Set commit title
         # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
         continue-on-error: true
-        run: |
-          COMMIT_TITLE="$(echo '''${{ github.event.head_commit.message }}''' | head -n 1)"
-          echo "COMMIT_TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
+        # We take the first line (%s) from the git log and then escape out any single quotes
+        # https://stackoverflow.com/a/24247870
+        run: echo COMMIT_MESSAGE=$(git log -n 1 --pretty=format:%s) >> $GITHUB_ENV
 
       - name: Notify Slack on Success
         uses: ravsamhq/notify-slack-action@v1
