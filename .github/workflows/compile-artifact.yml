@@ -54,6 +54,7 @@ jobs:
           mkdir -p vendor/cache
           bundle config set --local path vendor/bundle
           bundle config set --local cache vendor/cache
+          bundle config set without 'test development integration'
           bundle config set --local gemfile Gemfile${{ inputs.gemfile_suffix }}
 
       - name: bundle cache
@@ -95,7 +96,7 @@ jobs:
           BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
           BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
         run: |
-          bundle install --without test development integration --jobs 4 --retry 3
+          bundle install --jobs 4 --retry 3
           bundle clean --force
 
       # Pre-process the Beanstalk extensions and hooks
