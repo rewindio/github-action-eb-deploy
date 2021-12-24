@@ -13,6 +13,14 @@ on:
         default: ""
         required: false
         type: "string"
+     eb_ext_branch:
+        description: "The Elasticbeanstalk Extension branch to use"
+        required: true
+        default: "main"
+      eb_hook_branch:
+        description: "The Elasticbeanstalk Hook branch to use"
+        required: true
+        default: "main"
 
     secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
@@ -41,7 +49,9 @@ jobs:
       - name: Configure bundler
         run: |
           mkdir -p vendor/bundle
+          mkdir -p vendor/cache
           bundle config set --local path vendor/bundle
+          bundle config set --local cache vendor/cache
           bundle config set --local gemfile Gemfile${{ inputs.gemfile_suffix }}
 
       - name: bundle cache
@@ -83,7 +93,7 @@ jobs:
           BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
           BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
         run: |
-          bundle install --jobs 4 --retry 3
+          bundle install --without test development integration --jobs 4 --retry 3
           bundle clean --force
 
       # Pre-process the Beanstalk extensions and hooks
@@ -92,6 +102,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: rewindio/eb-extensions
+          ref: ${{ github.event.inputs.eb_ext_branch }}
           token: ${{ secrets.CONTAINER_REGISTRY_PAT }}
           path: tmp/eb-extensions
 
@@ -99,6 +110,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: rewindio/eb-platform-hooks
+          ref: ${{ github.event.inputs.eb_hook_branch }}
           token: ${{ secrets.CONTAINER_REGISTRY_PAT }}
           path: tmp/eb-platform-hooks
 
