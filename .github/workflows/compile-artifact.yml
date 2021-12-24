@@ -15,12 +15,14 @@ on:
         type: "string"
       eb_ext_branch:
         description: "The Elasticbeanstalk Extension branch to use"
-        required: true
+        required: false
         default: "main"
+        type: "string"
       eb_hook_branch:
         description: "The Elasticbeanstalk Hook branch to use"
-        required: true
+        required: false
         default: "main"
+        type: "string"
 
     secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
