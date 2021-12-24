@@ -63,7 +63,6 @@ jobs:
         with:
           path: |
             vendor/cache
-            vendor/bundle
           # Note: 'Gemfile.lock' does not have a suffix, therefore we do not use {0}.{1}.lock
           key: ${{ runner.os }}-bundle-${{ hashFiles(format('**/{0}{1}.lock', 'Gemfile', inputs.gemfile_suffix )) }}
           restore-keys: |
@@ -90,13 +89,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-platform-${{ github.sha }}
 
-      - name: bundle install
+      - name: bundle package
         if: steps.bundle-cache.outputs.cache-hit != 'true'
         env:
           BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
           BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
         run: |
-          bundle install --jobs 4 --retry 3
+          bundle package --no-install --jobs 4 --retry 3
           bundle clean --force
 
       # Pre-process the Beanstalk extensions and hooks
@@ -144,7 +143,6 @@ jobs:
         with:
           path: |
             vendor/cache
-            vendor/bundle
           key: ${{ runner.os }}-bundle-${{ hashFiles(format('**/{0}{1}.lock', 'Gemfile', inputs.gemfile_suffix )) }}
           restore-keys: |
             ${{ runner.os }}-bundle-
