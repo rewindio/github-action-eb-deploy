@@ -99,7 +99,6 @@ jobs:
         run: |
           bundle config list
           bundle cache --no-install
-          bundle clean --force
 
       # Pre-process the Beanstalk extensions and hooks
       # We always want to do this in case an extension changes in the extensions/hooks repos
