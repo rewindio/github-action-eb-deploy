@@ -97,7 +97,6 @@ jobs:
           BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
           BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
         run: |
-          bundle config list
           bundle cache --no-install
 
       # Pre-process the Beanstalk extensions and hooks
