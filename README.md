@@ -105,7 +105,7 @@ jobs:
 
 ## Release Management
 
-You may skip this section unless you are working on developing the action yourself.
+You may skip this section unless you are working on developing this project's action yourself.
 
 ### Version Numbering
 
