@@ -52,6 +52,10 @@ jobs:
         run: |
           mkdir -p vendor/bundle
           bundle config set --local path vendor/bundle
+          bundle config set --local without 'test development integration'
+          bundle config set --local clean 'true'
+          bundle config set --local jobs 4
+          bundle config set --local retry 3
           bundle config set --local gemfile Gemfile${{ inputs.gemfile_suffix }}
 
       - name: bundle cache
@@ -62,9 +66,9 @@ jobs:
             vendor/cache
             vendor/bundle
           # Note: 'Gemfile.lock' does not have a suffix, therefore we do not use {0}.{1}.lock
-          key: ${{ runner.os }}-bundle-${{ hashFiles(format('**/{0}{1}.lock', 'Gemfile', inputs.gemfile_suffix )) }}
+          key: ${{ runner.os }}-bundle-cache-${{ hashFiles(format('**/{0}{1}.lock', 'Gemfile', inputs.gemfile_suffix )) }}
           restore-keys: |
-            ${{ runner.os }}-bundle-
+            ${{ runner.os }}-bundle-cache-
 
       # Extensions caches need to be per commit because the extensions can change
       # without the underlying requirements.yml file changing
@@ -93,8 +97,7 @@ jobs:
           BUNDLE_RUBYGEMS__PKG__GITHUB__COM: ${{ secrets.BUNDLE_RUBYGEMS__PKG__GITHUB__COM }}
           BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
         run: |
-          bundle install --jobs 4 --retry 3
-          bundle clean --force
+          bundle install
 
       # Pre-process the Beanstalk extensions and hooks
       # We always want to do this in case an extension changes in the extensions/hooks repos
@@ -142,9 +145,9 @@ jobs:
           path: |
             vendor/cache
             vendor/bundle
-          key: ${{ runner.os }}-bundle-${{ hashFiles(format('**/{0}{1}.lock', 'Gemfile', inputs.gemfile_suffix )) }}
+          key: ${{ runner.os }}-bundle-cache-${{ hashFiles(format('**/{0}{1}.lock', 'Gemfile', inputs.gemfile_suffix )) }}
           restore-keys: |
-            ${{ runner.os }}-bundle-
+            ${{ runner.os }}-bundle-cache-
 
       - name: extensions cache
         uses: actions/cache@v2
