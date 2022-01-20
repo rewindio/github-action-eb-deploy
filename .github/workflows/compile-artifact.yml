@@ -5,7 +5,7 @@ on:
     inputs:
       docker_ruby_version:
         description: "The version of Ruby to be used by the job container"
-        default: "2.6.8"
+        default: "2.6.9"
         required: false
         type: "string"
       gemfile_suffix:
