@@ -23,6 +23,11 @@ on:
         default: ""
         required: false
         type: "string"
+      custom_procfile_dir:
+        description: "The directory of a Procfile to be moved to the base directory of the application zip. Should begin with './' (from application base directory)"
+        default: ""
+        required: false
+        type: "string"
 
     secrets:
       BUNDLE_RUBYGEMS__PKG__GITHUB__COM:
@@ -166,6 +171,11 @@ jobs:
           key: ${{ runner.os }}-extensions-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-platform-${{ github.sha }}
+
+      - name: set Procfile
+        if: inputs.custom_procfile_dir != ''
+        run: |
+          mv ${{ inputs.custom_procfile_dir }} ./Procfile
 
       - name: Create zip
         run:
