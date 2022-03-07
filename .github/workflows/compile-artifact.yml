@@ -23,8 +23,8 @@ on:
         default: ""
         required: false
         type: "string"
-      custom_procfile_dir:
-        description: "The directory of a Procfile to be moved to the base directory of the application zip. Should begin with './' (from application base directory)"
+      custom_procfile_path:
+        description: "The file path of a Procfile to be moved to the base directory of the application zip. Should begin with './' (from application base directory)"
         default: ""
         required: false
         type: "string"
@@ -173,9 +173,9 @@ jobs:
             ${{ runner.os }}-platform-${{ github.sha }}
 
       - name: set Procfile
-        if: inputs.custom_procfile_dir != ''
+        if: inputs.custom_procfile_path != ''
         run: |
-          mv ${{ inputs.custom_procfile_dir }} ./Procfile
+          mv ${{ inputs.custom_procfile_path }} ./Procfile
 
       - name: Create zip
         run:
