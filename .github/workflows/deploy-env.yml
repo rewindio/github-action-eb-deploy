@@ -94,7 +94,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.app }} in ${{ matrix.region }} (${{ matrix.env }}) has {status_message}'
           message_format: >
-            ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
+            ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_MESSAGE }}>
           footer: '<{repo_url}|{repo}>'
           notify_when: 'success'
         env:
@@ -108,7 +108,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           notification_title: '{emoji} <{run_url}|{workflow}> to ${{ matrix.app }} in ${{ matrix.region }} (${{ matrix.env }}) has {status_message}'
           message_format: >
-            ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_TITLE }}>
+            ${{ github.actor }} pushed <{commit_url}|${{ env.COMMIT_MESSAGE }}>
           footer: '<{repo_url}|{repo}>'
           notify_when: 'failure'
         env:
@@ -130,7 +130,7 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.LOOKUP_USER_EMAIL_SLACK_TOKEN }}
           slack-channel: "${{ steps.find-slack-user.outputs.username }}"
           slack-text: |
-            <@${{ steps.find-slack-user.outputs.member-id }}>: <${{ env.RUN_URL }}|${{ env.COMMIT_TITLE }}> has failed.
+            <@${{ steps.find-slack-user.outputs.member-id }}>: <${{ env.RUN_URL }}|${{ env.COMMIT_MESSAGE }}> has failed.
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
