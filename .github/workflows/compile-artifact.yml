@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Configure bundler
         run: |
@@ -102,7 +102,7 @@ jobs:
       # Pre-process the Beanstalk extensions and hooks
       # We always want to do this in case an extension changes in the extensions/hooks repos
       - name: Checkout EB extensions
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: rewindio/eb-extensions
           ref: ${{ inputs.eb_extensions_ref }}
@@ -110,7 +110,7 @@ jobs:
           path: tmp/eb-extensions
 
       - name: Checkout EB hooks
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: rewindio/eb-platform-hooks
           ref: ${{ inputs.eb_platform_hooks_ref }}
@@ -136,7 +136,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: bundle cache
         uses: actions/cache@v3
@@ -172,7 +172,7 @@ jobs:
           zip -r deploy.zip . -x '*.git*' 'log/*.log' 'integration-tests/**'
 
       - name: Archive application zip
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: eb-app-zip
           path: deploy.zip
