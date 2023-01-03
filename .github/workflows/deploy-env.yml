@@ -60,7 +60,7 @@ jobs:
           ${{ fromJson(inputs.deploy_matrix) }}
     steps:
       - name: Download deployment artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: eb-app-zip
       - name: Upload application zip to S3 and create EB application version
@@ -87,7 +87,7 @@ jobs:
         run: echo COMMIT_MESSAGE=$(git log -n 1 --pretty=format:%s) >> $GITHUB_ENV
 
       - name: Notify Slack on Success
-        uses: ravsamhq/notify-slack-action@v1
+        uses: ravsamhq/notify-slack-action@v2
         if: always()
         with:
           status: ${{ job.status }}
@@ -101,7 +101,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.DEPLOY_SUCCESS_SLACK_WEBHOOK_URL }}
 
       - name: Notify Slack on Failure
-        uses: ravsamhq/notify-slack-action@v1
+        uses: ravsamhq/notify-slack-action@v2
         if: always()
         with:
           status: ${{ job.status }}
